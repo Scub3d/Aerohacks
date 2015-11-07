@@ -1,8 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System;
 
 public class relaxinSceneMenuSelector : MonoBehaviour {
 
+	public string[] submenuTitles = new string[]{"Light Instrument", "White Noise", "ASMR Audio", "Nature"};
+	public int numberOfSubmenues = 2;
+	public string[,] submenuItemTitles = new string[4,2]{{"Piano", "Meditating Music"}, {"White Noise 1", "White Noise 2"}, {"Massage ASMR", "ASMR"}, {"Nature Sounds 1", "Nature Sounds 2"}};
+	public string[,] submenuItemURLs = new string[4,2]{{"/SoundFiles/Piano", "/SoundFiles/MeditaionMusic"}, {"/SoundFiles/WhiteNoise", "/SoundFiles/WhiteNoise2"}, {"/SoundFiles/MassageASMR", "/SoundFiles/ASMR"}, {"/SoundFiles/NatureSounds1", "/SoundFiles/NatureSounds2"}};
+	
 	public GameObject[] menuItems;
 	public GameObject[] menuItemsBorders;
 	public bool locked = false;
@@ -40,7 +47,12 @@ public class relaxinSceneMenuSelector : MonoBehaviour {
 	}
 
 	public void ifSelected(int index) {
-
+		RelaxinPassedInfo pinfo = GameObject.Find ("PassedInfo").GetComponent<RelaxinPassedInfo>();
+		pinfo.numberOfSubmenuItems = numberOfSubmenues;
+		pinfo.submenuItemTitles = new string[]{submenuItemTitles[index,0], submenuItemTitles[index,1]};
+		pinfo.submenuTitle = submenuTitles [index];
+		pinfo.songURLS = new string[]{submenuItemURLs[index,0], submenuItemURLs[index,1]};
+		Application.LoadLevel ("relaxinSubmenu");
 	}
 
 	public IEnumerator takeOne() {
