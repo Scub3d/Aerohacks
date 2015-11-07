@@ -8,7 +8,8 @@ public class relaxinSceneMenuSelector : MonoBehaviour {
 	public string[] submenuTitles = new string[]{"Light Instrument", "White Noise", "ASMR Audio", "Nature"};
 	public int numberOfSubmenues = 2;
 	public string[,] submenuItemTitles = new string[4,2]{{"Piano", "Meditating Music"}, {"White Noise 1", "White Noise 2"}, {"Massage ASMR", "ASMR"}, {"Nature Sounds 1", "Nature Sounds 2"}};
-	public string[,] submenuItemURLs = new string[4,2]{{"/SoundFiles/Piano", "/SoundFiles/MeditaionMusic"}, {"/SoundFiles/WhiteNoise", "/SoundFiles/WhiteNoise2"}, {"/SoundFiles/MassageASMR", "/SoundFiles/ASMR"}, {"/SoundFiles/NatureSounds1", "/SoundFiles/NatureSounds2"}};
+	public string[,] submenuItemURLs = new string[4,2]{{"SoundFiles/Piano", "SoundFiles/MeditaionMusic"}, {"SoundFiles/WhiteNoise", "SoundFiles/WhiteNoise2"}, 
+		{"SoundFiles/MassageASMR", "SoundFiles/ASMR"}, {"SoundFiles/NatureSounds1", "SoundFiles/NatureSounds2"}};
 	
 	public GameObject[] menuItems;
 	public GameObject[] menuItemsBorders;
@@ -36,6 +37,8 @@ public class relaxinSceneMenuSelector : MonoBehaviour {
 				changeSelectedItem (itemSelected - 1);
 			if(Input.GetButtonUp("Fire1"))
 				ifSelected(itemSelected);
+			if(Input.GetButtonUp("Fire2"))
+				Application.LoadLevel("mainMenue");
 		}
 	}
 

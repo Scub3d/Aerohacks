@@ -36,13 +36,13 @@ public class relaxinSubmenuHandler : MonoBehaviour {
 		for (int index = 0; index < numberOfSubmenuItems; index++) {
 			Vector3 pos = Vector3.zero;
 			if(numberOfSubmenuItems % 2 == 0)
-				pos = new Vector3(0, 20f * (numberOfSubmenuItems / 2 - index) + 10f, 0);
+				pos = new Vector3(0, 20f * (numberOfSubmenuItems / 2 - (index + 1)) + 10f, 60f);
 			else
-				pos = new Vector3(0, 20f * (numberOfSubmenuItems / 2 - index), 0);
+				pos = new Vector3(0, 20f * (numberOfSubmenuItems / 2 - index), 60f);
 			submenuItems[index] = (GameObject)Instantiate(submenuPrefab, pos, Quaternion.identity);
 			submenuItems[index] .transform.SetParent(GameObject.Find("submenu holder").transform);
 			submenuItems[index].GetComponent<TextMesh>().text = submenuItemsTitleString[index];
-			submenuSelectors[index] = GameObject.Find("border" + index+1);
+			submenuSelectors[index] = submenuItems[index].transform.FindChild("border1").gameObject;
 			if(index != 0)
 				submenuSelectors[index].GetComponent<SpriteRenderer>().enabled = false;
 		}
@@ -57,6 +57,8 @@ public class relaxinSubmenuHandler : MonoBehaviour {
 				changeSelectedItem (itemSelected - 1);
 			if(Input.GetButtonUp("Fire1"))
 				ifSelected(itemSelected);
+			else if(Input.GetButtonUp("Fire2"))
+				Application.LoadLevel("relaxinScene");
 		}
 	}
 	
@@ -69,6 +71,7 @@ public class relaxinSubmenuHandler : MonoBehaviour {
 
 	public void ifSelected(int myIndex) {
 		GameObject.Find ("AUDIO").GetComponent<AudioSource> ().clip = Resources.Load<AudioClip> (songURLs [myIndex]);
+		GameObject.Find ("AUDIO").GetComponent<AudioSource> ().Play ();
 	}
 	
 	public IEnumerator takeOne() {
