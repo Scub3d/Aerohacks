@@ -51,9 +51,9 @@ public class nearMeFetcher : MonoBehaviour {
 		float alt = (float)flight2.Alt * 0.3048f; //Feet to meters
 		float radius = Mathf.Tan (60f * Mathf.Deg2Rad) * alt;
 		//DEBUG
-		lat = 37.750179f;
-		lng = -122.462813f;
-		radius = 20000;
+		//lat = 37.750179f;
+		//lng = -122.462813f;
+		//radius = 20000;
 		//
 		string url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + lat + "," + lng + "&radius=" + (int)radius + "&types=airport|aquarium|museum|casino|shopping_mall|stadium|zoo|university&key=AIzaSyC-CL4XpshMmVqpGnBiuL1GRe0PLinj-U0";
 		www = new WWW (url);
