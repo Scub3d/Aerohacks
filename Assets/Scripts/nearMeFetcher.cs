@@ -24,6 +24,10 @@ public class nearMeFetcher : MonoBehaviour {
 	public string[] wikiTexts;
 
 
+	public bool locked = false;
+	public int midVisibleCard;
+
+
 	public List<string> titles = new List<string>();
 	public List<string> bodies = new List<string>();
 	// Use this for initialization
@@ -116,6 +120,7 @@ public class nearMeFetcher : MonoBehaviour {
 
 	GameObject[] cards;
 	public GameObject cardPrefab;
+	public GameObject[] pubCards;
 
 	public void createCards() {
 		int size = titles.Count;
@@ -124,33 +129,54 @@ public class nearMeFetcher : MonoBehaviour {
 		for (int index = 0; index < size; index++) {
 			Vector3 pos = Vector3.zero;
 			if(size % 2 == 0)
-				pos = new Vector3(9f * (size / 2 - (index + 1)) + 9f, 0, 8f);
+				pos = new Vector3(9f * (size / 2 - (index + 1)) + 9f, -7f, 8f);
 			else
-				pos = new Vector3(9f * (size / 2 - index), 0, 8f);
+				pos = new Vector3(9f * (size / 2 - index), -7f, 8f);
 
-			cards[index] = (GameObject)Instantiate(cardPrefab, pos, Quaternion.identity);
+			cards[index] = (GameObject)Instantiate(cardPrefab, pos, cardPrefab.transform.rotation);
 			cards[index] .transform.SetParent(GameObject.Find("dealer").transform);
 			cards[index].transform.FindChild("titleText").GetComponent<TextMesh>().text = titles.ElementAt(index);
-			cards[index].transform.FindChild("bodyText").GetComponent<TextMesh>().text = bodies.ElementAt(index);
+			cards[index].transform.FindChild("bodyText").GetComponent<TextMesh>().text = modifiedText(bodies.ElementAt(index));
 
-			if(index != size / 2 || index != size / 2 + 1|| index != size / 2 - 1) {
-				cards[index].GetComponent<MeshRenderer>().enabled = false;
-				cards[index].transform.FindChild("titleText").GetComponent<MeshRenderer>().enabled = false;
-				cards[index].transform.FindChild("bodyText").GetComponent<MeshRenderer>().enabled = false;
-			} else {
-				cards[index].GetComponent<MeshRenderer>().enabled = true;
-				cards[index].transform.FindChild("titleText").GetComponent<MeshRenderer>().enabled = true;
-				cards[index].transform.FindChild("bodyText").GetComponent<MeshRenderer>().enabled = true;
-			}
+			midVisibleCard = size/2;
 		}
 	}
 
+	public string modifiedText(string text) {
+		string newText = "";
+		text = text.Replace ("\n", " ");
+		for (int letter = 0; letter < text.Length; letter+=23) {
+			try {
+				newText += text.Substring(letter, 23);
+				newText += "\n";
+			} catch (Exception e) {
+				;
+			}
+		}
+		return newText;
+	}
+	
+	void Update () {
+		if (!locked) {
+			if (Input.GetAxisRaw ("Horizontal") == 1)
+				changeSelectedItem (1);
+			else if (Input.GetAxisRaw ("Horizontal") == -1)
+				changeSelectedItem (-1);
+			if(Input.GetButtonUp("Fire2"))
+				Application.LoadLevel("mainMenue");
+		}
+	}
+	
+	public IEnumerator takeOne() {
+		locked = true;
+		yield return new WaitForSeconds (1);
+		locked = false;
+	}
 
-
-
-
-
-
+	public void changeSelectedItem(int dir) {
+		
+		GameObject.Find ("dealer").transform.position = new Vector3 (GameObject.Find ("dealer").transform.position.x + (dir * 1f), GameObject.Find ("dealer").transform.position.y, GameObject.Find ("dealer").transform.position.z);
+	}
 }
 
 
