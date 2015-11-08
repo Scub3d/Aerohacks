@@ -50,7 +50,7 @@ public class YouTubeController : MonoBehaviour {
 				StartCoroutine(takeOne());
 
 			}
-			if(Input.GetButtonUp("Fire2"))
+			if(Input.GetButtonDown("Fire2"))
 				Application.LoadLevel("mainMenue");
 			if(Input.GetButtonUp("Fire3")) {
 				InputSimulator.SimulateKeyPress(VirtualKeyCode.VK_S);
