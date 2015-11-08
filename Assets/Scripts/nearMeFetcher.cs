@@ -22,6 +22,10 @@ public class nearMeFetcher : MonoBehaviour {
 
 	public string[] cardTitles;
 	public string[] wikiTexts;
+
+
+	public List<string> titles = new List<string>();
+	public List<string> bodies = new List<string>();
 	// Use this for initialization
 	void Start () {
 		PlaneXML = new PlaneXMLv1 ();
@@ -48,7 +52,6 @@ public class nearMeFetcher : MonoBehaviour {
 		radius = 20000;
 		//
 		string url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + lat + "," + lng + "&radius=" + (int)radius + "&types=airport|aquarium|museum|casino|shopping_mall|stadium|zoo|university&key=AIzaSyC-CL4XpshMmVqpGnBiuL1GRe0PLinj-U0";
-		print ("Getting url " + url);
 		www = new WWW (url);
 		yield return www;
 		string json = www.text;
@@ -64,15 +67,16 @@ public class nearMeFetcher : MonoBehaviour {
 		int size = k;
 		cardTitles = new string[k];
 		wikiTexts = new string[k];
+
 		while (N["results"][++i]["id"] != null) {
 	
 			cardTitles[i] = N["results"] [i] ["name"];
-			WWW w = new WWW(("https://en.wikipedia.org/w/api.php?action=opensearch&search=" + cardTitles[i] + "&limit=1&namespace=0&format=jsonfm").Replace(" ", "%20"));
+			WWW w = new WWW(("https://en.wikipedia.org/w/api.php?action=opensearch&search=" + cardTitles[i] + "&limit=1&namespace=0&format=json").Replace(" ", "%20"));
 			yield return w;
 			var temp = JSON.Parse(w.text);
-			print (temp);
+			print (temp[1][0]);
 			if(temp[0] != null)
-				cardTitles[i] = temp[0];
+				cardTitles[i] = temp[1][0];
 			else {
 				cardTitles[i] = null;
 			}
@@ -85,15 +89,22 @@ public class nearMeFetcher : MonoBehaviour {
 			}
 
 					              
-			WWW w2 = new WWW (("https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles=" + newTitleList[i]).Replace(" ", "%20"));
+			WWW w2 = new WWW (("https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles=" + newTitleList[i] + "&format=json").Replace(" ", "%20"));
 			yield return w2;
 			var temp2 = JSON.Parse(w2.text);
+			if(temp2["query"]["pages"][0][3] != null) { 
+				wikiTexts[i] = StripHTML(temp2["query"]["pages"][0][3], true);
 
-			wikiTexts[i] = StripHTML(temp2["query"]["pages"]["extract"][0]["extract"], true);
+				titles.Add(newTitleList.ElementAt(i));
+				bodies.Add(wikiTexts[i]);
+			}
 
 			if (i > 100)
 				break;
 		}
+
+		createCards ();
+
 	}        
 
 	public static string StripHTML(string HTMLText, bool decode = true)  {
@@ -101,4 +112,48 @@ public class nearMeFetcher : MonoBehaviour {
 		var stripped = reg.Replace(HTMLText, "");
 		return decode ? HttpUtility.HtmlDecode(stripped) : stripped;
 	}
+
+
+	GameObject[] cards;
+	public GameObject cardPrefab;
+
+	public void createCards() {
+		int size = titles.Count;
+		cards = new GameObject[size];
+
+		for (int index = 0; index < size; index++) {
+			Vector3 pos = Vector3.zero;
+			if(size % 2 == 0)
+				pos = new Vector3(9f * (size / 2 - (index + 1)) + 9f, 0, 8f);
+			else
+				pos = new Vector3(9f * (size / 2 - index), 0, 8f);
+
+			cards[index] = (GameObject)Instantiate(cardPrefab, pos, Quaternion.identity);
+			cards[index] .transform.SetParent(GameObject.Find("dealer").transform);
+			cards[index].transform.FindChild("titleText").GetComponent<TextMesh>().text = titles.ElementAt(index);
+			cards[index].transform.FindChild("bodyText").GetComponent<TextMesh>().text = bodies.ElementAt(index);
+
+			if(index != size / 2 || index != size / 2 + 1|| index != size / 2 - 1) {
+				cards[index].GetComponent<MeshRenderer>().enabled = false;
+				cards[index].transform.FindChild("titleText").GetComponent<MeshRenderer>().enabled = false;
+				cards[index].transform.FindChild("bodyText").GetComponent<MeshRenderer>().enabled = false;
+			} else {
+				cards[index].GetComponent<MeshRenderer>().enabled = true;
+				cards[index].transform.FindChild("titleText").GetComponent<MeshRenderer>().enabled = true;
+				cards[index].transform.FindChild("bodyText").GetComponent<MeshRenderer>().enabled = true;
+			}
+		}
+	}
+
+
+
+
+
+
+
 }
+
+
+
+
+
