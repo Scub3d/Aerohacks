@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 using System.Collections;
 using System;
 public class GoogleMap : MonoBehaviour {
@@ -19,8 +19,11 @@ public class GoogleMap : MonoBehaviour {
 	public GoogleMapPath[] paths;
 
 	public GameObject mainCam;
+	public ClientObject co;
 	
 	void Start() {
+		co = new ClientObject ("DAL80");
+		co.Start();
 		grabNewGPSCoords ();
 		mainCam.GetComponent<Rigidbody> ().velocity = new Vector3 (0, .75f, 0);
 		if(loadOnStart) Refresh();	
@@ -28,6 +31,7 @@ public class GoogleMap : MonoBehaviour {
 
 	void Update() {
 		checkIfNeedToRespawn ();
+		print (co.flight2.Lat);
 	}
 
 	public void checkIfNeedToRespawn() {
@@ -45,8 +49,20 @@ public class GoogleMap : MonoBehaviour {
 
 
 	public void grabNewGPSCoords() {
-		centerLocation.latitude = 60.18626f; // new lat
-		centerLocation.longitude = 24.97072f; // new long
+		try {
+			Debug.Log(co.flight2.Lat + "asdfad");
+			centerLocation.latitude = (float)co.flight2.Lat;//60.18626f; // new lat
+			centerLocation.longitude = (float)co.flight2.Lon; //24.97072f; // new long
+		} catch(Exception e) {
+			StartCoroutine(redoIt());
+		}
+	}
+
+	public IEnumerator redoIt() {
+		yield return new WaitForSeconds (1);
+		grabNewGPSCoords ();
+		
+		Refresh ();
 	}
 	
 	public void Refresh() {
@@ -160,4 +176,4 @@ public class GoogleMapPath
 	public bool fill = false;
 	public GoogleMapColor fillColor;
 	public GoogleMapLocation[] locations;	
-}
+}*/
