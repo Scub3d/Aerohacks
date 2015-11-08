@@ -1,7 +1,20 @@
-/*using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System;
-public class GoogleMap : MonoBehaviour {
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using SimpleJSON;
+
+public class FUCKTHEPOLICE : MonoBehaviour {
+	public string flightID;
+	public TextMesh textPrefab;
+	public FIStatic flight;
+	public FIDynamic flight2;
+	public PlaneXMLv1 PlaneXML;
+	public NetworkCredential c;
+
 	public enum MapType {
 		RoadMap,
 		Satellite,
@@ -13,62 +26,48 @@ public class GoogleMap : MonoBehaviour {
 	public GoogleMapLocation centerLocation;
 	public int zoom = 13;
 	public MapType mapType;
-	public int size = 512;
+	public int size = 4096;
 	public bool doubleResolution = false;
 	public GoogleMapMarker[] markers;
 	public GoogleMapPath[] paths;
 
-	public GameObject mainCam;
-	public ClientObject co;
+	public FUCKTHEPOLICE(string fNum) {
+		this.flightID = fNum;
+	}
+	// Use this for initialization
 	
-	void Start() {
-		co = new ClientObject ("DAL80");
-		co.Start();
-		grabNewGPSCoords ();
-		mainCam.GetComponent<Rigidbody> ().velocity = new Vector3 (0, .75f, 0);
+	public IEnumerator Start () {
+
 		if(loadOnStart) Refresh();	
-	}
 
-	void Update() {
-		checkIfNeedToRespawn ();
-		print (co.flight2.Lat);
-	}
-
-	public void checkIfNeedToRespawn() {
-		if (Math.Pow (mainCam.transform.position.x, 2) + Math.Pow (mainCam.transform.position.y, 2) > 22*22) 
-			respawnCamera ();
-	}
-
-	public void respawnCamera() {
-		mainCam.transform.position = new Vector3 (0, 12f, 12f);
-
-		grabNewGPSCoords ();
-
-		Refresh ();
-	}
-
-
-	public void grabNewGPSCoords() {
-		try {
-			Debug.Log(co.flight2.Lat + "asdfad");
-			centerLocation.latitude = (float)co.flight2.Lat;//60.18626f; // new lat
-			centerLocation.longitude = (float)co.flight2.Lon; //24.97072f; // new long
-		} catch(Exception e) {
-			StartCoroutine(redoIt());
+		PlaneXML = new PlaneXMLv1 ();
+		c = new NetworkCredential("kushagra.pundeer@gmail.com", "B8955E7C-C03F-4CF9-9B8D-C38C50FDA67A");
+		PlaneXML.Credentials = c;
+		flight = PlaneXML.FlightInfo(flightID, true, true);
+		while(true) {
+			StartCoroutine("refresh");
+			yield return new WaitForSeconds(2);
 		}
-	}
-
-	public IEnumerator redoIt() {
-		yield return new WaitForSeconds (1);
-		grabNewGPSCoords ();
-		
-		Refresh ();
 	}
 	
-	public void Refresh() {
-		if(autoLocateCenter && (markers.Length == 0 && paths.Length == 0)) {
-			Debug.LogError("Auto Center will only work if paths or markers are used.");	
+	void Update() {
+		checkIfCoordsChanged ();
+	}
+
+	public void checkIfCoordsChanged() {
+		if ((flight2.Lat != null && flight2.Lon != null) && (Decimal.Round((decimal)flight2.Lat, 4) 
+		     != Decimal.Round((decimal)centerLocation.latitude, 4) || Decimal.Round((decimal)flight2.Lon, 4) != Decimal.Round((decimal)centerLocation.longitude, 4))) {
+			grabNewGPSCoords();
+			Refresh ();
 		}
+	}
+	
+	public void grabNewGPSCoords() {
+		centerLocation.latitude = (float)flight2.Lat;//60.18626f; // new lat
+		centerLocation.longitude = (float)flight2.Lon; //24.97072f; // new long
+	}
+		
+	public void Refresh() {
 		StartCoroutine(_Refresh());
 	}
 	
@@ -82,16 +81,14 @@ public class GoogleMap : MonoBehaviour {
 			else {
 				qs += "center=" + string.Format ("{0},{1}", centerLocation.latitude, centerLocation.longitude);
 			}
-		
+			
 			qs += "&zoom=" + zoom.ToString ();
 		}
 		qs += "&size=" + string.Format ("{0}x{0}", size);
 		qs += "&scale=" + (doubleResolution ? "2" : "1");
 		qs += "&maptype=" + mapType.ToString ().ToLower ();
 		var usingSensor = false;
-#if UNITY_IPHONE
-		usingSensor = Input.location.isEnabledByUser && Input.location.status == LocationServiceStatus.Running;
-#endif
+
 		qs += "&sensor=" + (usingSensor ? "true" : "false");
 		
 		foreach (var i in markers) {
@@ -126,8 +123,11 @@ public class GoogleMap : MonoBehaviour {
 			GetComponent<Renderer>().material.mainTexture = tex;
 		}
 	}
+
 	
-	
+	void refresh() {
+		flight2 = PlaneXML.FlightStatus(flightID);
+	}	
 }
 
 public enum GoogleMapColor
@@ -176,4 +176,4 @@ public class GoogleMapPath
 	public bool fill = false;
 	public GoogleMapColor fillColor;
 	public GoogleMapLocation[] locations;	
-}*/
+}
